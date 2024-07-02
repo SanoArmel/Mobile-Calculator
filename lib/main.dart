@@ -4,9 +4,18 @@ import 'auth_service.dart';
 import 'calculator_screen.dart';
 import 'sign_in_screen.dart';
 import 'sign_up_screen.dart';
+import 'theme_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,31 +23,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthService(),
-      child: MaterialApp(
-        title: 'Calculator',
-        theme: ThemeData.light().copyWith(
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white, // Set app bar background color to white
-          ),
-          scaffoldBackgroundColor: Colors.white, // Set scaffold background color to white
-          primaryColor: Colors.blue, // Set primary color to blue
-          hintColor: Colors.indigo, // Set accent color to indigo
-          textTheme: const TextTheme(
-            bodyLarge: TextStyle(color: Colors.black), // Set body text color to black
-            bodyMedium: TextStyle(color: Colors.black), // Set body text color to black
-            titleLarge: TextStyle(color: Colors.black), // Set headline text color to black
-          ),
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return MaterialApp(
+      title: 'Calculator',
+      themeMode: themeProvider.themeMode,
+      theme: ThemeData.light().copyWith(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
         ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const HomeScreen(),
-          '/signIn': (context) => const SignInScreen(),
-          '/signUp': (context) => const SignUpScreen(),
-          '/calculator': (context) => const CalculatorScreen(),
-        },
+        scaffoldBackgroundColor: Colors.white,
+        primaryColor: Colors.blue,
+        hintColor: Colors.indigo,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black), // Example of bodyText1 usage
+        ),
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+        primaryColor: Colors.blue,
+        hintColor: Colors.indigo,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white), // Example of bodyText1 usage
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomeScreen(),
+        '/signIn': (context) => const SignInScreen(),
+        '/signUp': (context) => const SignUpScreen(),
+        '/calculator': (context) => const CalculatorScreen(),
+      },
     );
   }
 }
@@ -49,10 +67,19 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calculator App'),
+        actions: [
+          Switch(
+            value: themeProvider.themeMode == ThemeMode.dark,
+            onChanged: (value) {
+              themeProvider.toggleTheme(value);
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: Container(
@@ -129,4 +156,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
